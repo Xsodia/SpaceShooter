@@ -154,7 +154,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifePoints: 3
-  speed: 10
+  speed: 7.5
+  thrustersBooster: 3.75
   boundLimitTop: 0
   boundLimitBottom: -3.9
   boundLimitX: 11.3

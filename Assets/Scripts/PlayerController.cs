@@ -10,9 +10,13 @@ public class PlayerController : MonoBehaviour
     private int score = 0;
 
     [SerializeField] private float speed;
+    [SerializeField] private float thrustersBooster = 0.5f;
     [SerializeField] private float boundLimitTop;
     [SerializeField] private float boundLimitBottom;
     [SerializeField] private float boundLimitX;
+    //this variable is necessary to not mess with the actual speed variable which already has a ratio link to coroutine
+    //for example if we don't use this variable, setting back the speed to normal value may cause unwanted behavior if a speedUp Coroutine is already running
+    private float thrusterBonusSpeed = 0;
 
     [SerializeField] private GameObject laserPrefab;
     [SerializeField] private GameObject tripleShotPrefab;
@@ -114,7 +118,18 @@ public class PlayerController : MonoBehaviour
 
         Vector3 direction = new Vector3(horizontalInput, verticalInput, 0);
 
-        transform.Translate(direction * speed * Time.deltaTime);
+        //Thrusters Booster
+        if(Input.GetKey(KeyCode.LeftShift))
+        {
+            //Acceleration per second
+            thrusterBonusSpeed += thrustersBooster * Time.deltaTime;
+        }
+        if(Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            thrusterBonusSpeed = 0;
+        }
+
+        transform.Translate(direction *  ( speed + thrusterBonusSpeed) * Time.deltaTime);
 
 
         transform.position = new Vector3(transform.position.x, Mathf.Clamp(transform.position.y, boundLimitBottom, boundLimitTop), 0);

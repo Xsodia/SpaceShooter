@@ -27,15 +27,16 @@ public class PlayerController : MonoBehaviour
     private bool isTripleShotActive = false;
     private Coroutine tripleShotPowerUpCoroutine;
 
-    private float speedPowerup = 2;
+    [SerializeField] private float speedPowerup = 2;
     private bool isSpeedActive = false;
     private Coroutine speedPowerUpCoroutine;
 
-    private bool isShieldActive = false;
+    private int shieldHP = 0;
     private GameObject shieldGameObject;
+    private SpriteRenderer shieldSprite;
 
 
-    private GameObject[] engines = new GameObject[2];
+    private readonly GameObject[] engines = new GameObject[2];
 
     private SpawnManager spawnManager;
     private UIManager ui;
@@ -61,7 +62,16 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("Shield GameObject not found.");
             Debug.LogError(System.Environment.StackTrace);
         }
+        else
+        {
+            shieldSprite = shieldGameObject.GetComponent<SpriteRenderer>();
+            if(shieldSprite == null)
+            {
+                Debug.LogError("Shield sprite renderer not found. \n" + StackTraceUtility.ExtractStackTrace());
+            }
+        }
 
+        
         for(int i = 0; i < 2; i++ )
         {
             engines[i] = transform.GetChild(i+2).gameObject;
@@ -165,10 +175,27 @@ public class PlayerController : MonoBehaviour
 
     public void ReceiveDamage(int amount)
     {
-        if(isShieldActive)
+        if(shieldHP > 0)
         {
-            isShieldActive = false;
-            shieldGameObject.SetActive(false);
+            switch(shieldHP)
+            {
+                case 3:
+                    shieldHP--;
+                    shieldSprite.color = Color.yellow;
+                    break;
+                case 2:
+                    shieldHP--;
+                    shieldSprite.color = Color.red;
+                    break;
+                case 1:
+                    shieldHP--;
+                    shieldGameObject.SetActive(false);
+                    break;
+                default:
+                    Debug.LogWarning("Couldn't process Shield HP.\n" + StackTraceUtility.ExtractStackTrace());
+                    break;
+            }
+
             return;
         }
 
@@ -235,7 +262,7 @@ public class PlayerController : MonoBehaviour
         {
             StopCoroutine(speedPowerUpCoroutine);
         }
-        tripleShotPowerUpCoroutine = StartCoroutine(SpeedPowerUpRoutine(powerUpDuration));
+        speedPowerUpCoroutine = StartCoroutine(SpeedPowerUpRoutine(powerUpDuration));
     }
 
     IEnumerator SpeedPowerUpRoutine(float powerUpDuration)
@@ -249,7 +276,8 @@ public class PlayerController : MonoBehaviour
 
     public void ShieldPowerUp()
     {
-        isShieldActive = true;
+        shieldHP = 3;
+        shieldSprite.color = Color.white; // original
         shieldGameObject.SetActive(true);
     }
     /*----------------------- PowerUps Section ends here -----------------------*/
